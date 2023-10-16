@@ -11,9 +11,9 @@ public:
     void destroy();
     void update(const GameData &gameData);
 
-    GLuint m_vao{};
-    GLuint m_vbo{};
-    GLuint m_ebo{};
+    GLuint m_VAO{};
+    GLuint m_VBO{};
+    GLuint m_EBO{};
     glm::vec4 m_color{1};
     float m_rotation{};
     float m_scale{0.1f};

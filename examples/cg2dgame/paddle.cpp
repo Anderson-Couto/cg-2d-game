@@ -30,34 +30,34 @@ void Paddle::create(GLuint program) {
 
   std::array indices{0, 1, 2, 3, 0, 2, 1, 3};
   // Generate VBO
-  abcg::glGenBuffers(1, &m_vbo);
-  abcg::glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+  abcg::glGenBuffers(1, &m_VBO);
+  abcg::glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
   abcg::glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions.data(),
                GL_STATIC_DRAW);
   abcg::glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   // Generate EBO
-  abcg::glGenBuffers(1, &m_ebo);
-  abcg::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
+  abcg::glGenBuffers(1, &m_EBO);
+  abcg::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
   abcg::glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices.data(),
                GL_STATIC_DRAW);
   abcg::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
   // Get location of attributes in the program
-  GLint positionAttribute{glGetAttribLocation(m_program, "inPosition")};
+  GLint positionAttribute{abcg::glGetAttribLocation(m_program, "inPosition")};
 
   // Create VAO
-  abcg::glGenVertexArrays(1, &m_vao);
+  abcg::glGenVertexArrays(1, &m_VAO);
 
   // Bind vertex attributes to current VAO
-  abcg::glBindVertexArray(m_vao);
+  abcg::glBindVertexArray(m_VAO);
 
   abcg::glEnableVertexAttribArray(positionAttribute);
-  abcg::glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+  abcg::glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
   abcg::glVertexAttribPointer(positionAttribute, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
   abcg::glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-  abcg::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
+  abcg::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
 
   // End of binding to current VAO
   abcg::glBindVertexArray(0);
@@ -68,7 +68,7 @@ void Paddle::paint(const GameData &gameData) {
 
   abcg::glUseProgram(m_program);
 
-  abcg::glBindVertexArray(m_vao);
+  abcg::glBindVertexArray(m_VAO);
 
   abcg::glUniform1f(m_scaleLoc, m_scale);
   abcg::glUniform1f(m_rotationLoc, m_rotation);
@@ -86,9 +86,9 @@ void Paddle::paint(const GameData &gameData) {
 }
 
 void Paddle::destroy() {
-  abcg::glDeleteBuffers(1, &m_vbo);
-  abcg::glDeleteBuffers(1, &m_ebo);
-  abcg::glDeleteVertexArrays(1, &m_vao);
+  abcg::glDeleteBuffers(1, &m_VBO);
+  abcg::glDeleteBuffers(1, &m_EBO);
+  abcg::glDeleteVertexArrays(1, &m_VAO);
 }
 
 void Paddle::update(const GameData &gameData) {

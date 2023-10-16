@@ -6,6 +6,7 @@
 #include "abcgOpenGL.hpp"
 #include "gamedata.hpp"
 #include "paddle.hpp"
+#include "ball.hpp"
 
 class Window : public abcg::OpenGLWindow {
  protected:
@@ -28,9 +29,11 @@ class Window : public abcg::OpenGLWindow {
   GameData m_gameData;
 
   Paddle m_paddle;
+  Ball m_ball;
 
   abcg::Timer m_restartWaitTimer;
 
+  ImFont* m_font_small{};
   ImFont* m_font{};
 
   std::default_random_engine m_randomEngine;

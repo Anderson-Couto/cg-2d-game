@@ -31,6 +31,11 @@ void Window::onCreate() {
     throw abcg::RuntimeError("Cannot load font file");
   }
 
+  m_font_small = ImGui::GetIO().Fonts->AddFontFromFileTTF(filename.c_str(), 24.0f);
+  if (m_font_small == nullptr) {
+    throw abcg::RuntimeError("Cannot load font file");
+  }
+
   m_objectsProgram =
       abcg::createOpenGLProgram({{.source = assetsPath + "objects.vert",
                                   .stage = abcg::ShaderStage::Vertex},
@@ -53,6 +58,7 @@ void Window::onCreate() {
 void Window::restart() {
   m_gameData.m_state = State::Playing;
   m_paddle.create(m_objectsProgram);
+  m_ball.create(m_objectsProgram);
 }
 
 void Window::onUpdate() {
@@ -63,6 +69,7 @@ void Window::onUpdate() {
   }
 
   m_paddle.update(m_gameData);
+  m_ball.update(m_paddle, m_gameData);
 
   if (m_gameData.m_state == State::Playing) {
     // checkCollisions();
@@ -76,20 +83,34 @@ void Window::onPaint() {
   abcg::glViewport(0, 0, m_viewportSize.x, m_viewportSize.y);
 
   m_paddle.paint(m_gameData);
+  m_ball.paint();
 }
 
 void Window::onPaintUI() {
   abcg::OpenGLWindow::onPaintUI();
   {
+    auto count{ fmt::format("{}", m_ball.m_top_count )};
+    auto const sizeStart{ImVec2(m_viewportSize.x, m_viewportSize.y)};
+    auto const positionStart{
+        ImVec2((m_viewportSize.x) / 23.0f, (m_viewportSize.y) / 17.0f)};
+    ImGui::SetNextWindowPos(positionStart);
+    ImGui::SetNextWindowSize(sizeStart);
+    ImGuiWindowFlags const flags{ImGuiWindowFlags_NoBackground |
+                                 ImGuiWindowFlags_NoTitleBar |
+                                 ImGuiWindowFlags_NoNavInputs};
+    ImGui::Begin(" ", nullptr, flags);
+    ImGui::PushFont(m_font_small);
+    ImGui::Text(count.c_str());
+    ImGui::PopFont();
+    ImGui::End();
+
     auto size{ImVec2(300, 85)};
     auto const position{ImVec2((m_viewportSize.x - size.x) / 2.0f,
                                (m_viewportSize.y - size.y) / 2.0f)};
     ImGui::SetNextWindowPos(position);
     ImGui::SetNextWindowSize(size);
-    ImGuiWindowFlags flags{ImGuiWindowFlags_NoBackground |
-                           ImGuiWindowFlags_NoTitleBar |
-                           ImGuiWindowFlags_NoInputs};
     ImGui::Begin(" ", nullptr, flags);
+
     ImGui::PushFont(m_font);
 
     if (m_gameData.m_state == State::GameOver) {
@@ -110,8 +131,9 @@ void Window::onResize(glm::ivec2 const &size) {
 }
 
 void Window::onDestroy() {
-  glDeleteProgram(m_objectsProgram);
+  abcg::glDeleteProgram(m_objectsProgram);
 
+  m_ball.destroy();
   m_paddle.destroy();
 }
 
@@ -120,5 +142,8 @@ void Window::checkWinCondition() {
 }
 
 void Window::checkLossCondition() {
-  return;
+  if (m_ball.m_translation.y <= m_paddle.m_translation.y) {
+    m_gameData.m_state = State::GameOver;
+    m_restartWaitTimer.restart();
+  }
 }
