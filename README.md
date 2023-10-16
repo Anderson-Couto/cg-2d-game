@@ -1,5 +1,9 @@
 # Pong Game
 
+# Membros
+
+Anderson Couto Cardoso (RA 21017415)
+
 ## Introdução
 
 Aplicação desenvolvida para o curso Computação Gráfica, com o intuito de mostrar gráficos 2D com Open GL e permitir interações com o usuário a partir de mouse/teclado.
