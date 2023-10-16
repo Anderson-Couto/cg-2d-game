@@ -138,7 +138,10 @@ void Window::onDestroy() {
 }
 
 void Window::checkWinCondition() {
-  return;
+  if ( m_ball.m_top_count >= 10 ) {
+    m_gameData.m_state = State::Win;
+    m_restartWaitTimer.restart();
+  }
 }
 
 void Window::checkLossCondition() {
