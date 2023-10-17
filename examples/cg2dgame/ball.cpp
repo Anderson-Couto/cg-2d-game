@@ -21,6 +21,7 @@ void Ball::create(GLuint program) {
   m_down = true;
   m_paddle = false;
   m_top_count = 0;
+  m_velocity = 1.0f;
   m_program = program;
   m_colorLoc = abcg::glGetUniformLocation(m_program, "color");
   m_scaleLoc = abcg::glGetUniformLocation(m_program, "scale");
@@ -91,56 +92,58 @@ bool Ball::checkPos(Paddle &paddle) {
                     paddle.m_translation.x + 0.12 >= m_translation.x;
 }
 
-void Ball::update(Paddle &paddle, const GameData &gameData) {
+void Ball::update(Paddle &paddle, const GameData &gameData, float deltaTime) {
   if (gameData.m_state == State::Playing &&
       m_ballTimer.elapsed() > 10.0 / 1000.0) {
     m_ballTimer.restart();
 
     // check the borders to change the direction of the ball
+
+    //touched in the right side
     if (m_translation.x >= 0.99f) {
       m_left = true;
       m_right = false;
     }
 
+    //touched in the left side
     if (m_translation.x <= -0.99f) {
       m_left = false;
       m_right = true;
     }
 
+    //touched in the top side
     if (m_translation.y >= 0.99f) {
       m_down = true;
       m_up = false;
       m_top_count += 1;
+      m_velocity = m_velocity * (1 + 0.05f * m_top_count);
     }
 
     // when the ball hit the paddle it changes the direction
-
-    // when the ball hit a brick, it changes the direction according to which
-    // side of the brick the ball hit (up, down, left or right side)
     if (m_paddle) {
       m_down = false;
       m_up = true;
       m_paddle = false;
     }
-
+    
     // directions of the ball
     if (m_left) {
       if (m_translation.x < -0.0f) {
         if (m_translation.x - 0.01f < -0.99f) {
           m_translation.x = -0.99f;
         } else {
-          m_translation.x -= 0.01f;
+          m_translation.x -= 0.01f * m_velocity;
         }
       } else {
-        m_translation.x -= 0.01;
+        m_translation.x -= 0.01 * m_velocity;
       }
 
     } else if (m_right) {
       if (m_translation.x < -0.0f) {
-        m_translation.x += 0.01;
+        m_translation.x += 0.01 * m_velocity;
       } else {
         if (m_translation.x + 0.01f < 0.99f) {
-          m_translation.x += 0.01f;
+          m_translation.x += 0.01f * m_velocity;
         } else {
           m_translation.x = 0.99f;
         }
@@ -150,28 +153,29 @@ void Ball::update(Paddle &paddle, const GameData &gameData) {
     if (m_down) {
       if (m_translation.y < -0.0f) {
         if (m_translation.y - 0.01f > -0.87f) {
-          m_translation.y -= 0.01;
+          m_translation.y -= 0.01 * m_velocity;
         } else {
           if (checkPos(paddle)) {
             m_translation.y = -0.87f;
           } else {
-            m_translation.y -= 0.01;
+            m_translation.y -= 0.01 * m_velocity;
           }
         }
       } else {
-        m_translation.y -= 0.01;
+        m_translation.y -= 0.01 * m_velocity;
       }
 
     } else if (m_up) {
       if (m_translation.y < -0.0f) {
-        m_translation.y += 0.01f;
+        m_translation.y += 0.01f * m_velocity;
       } else {
         if (m_translation.y + 0.01f < 0.99f) {
-          m_translation.y += 0.01f;
+          m_translation.y += 0.01f * m_velocity;
         } else {
           m_translation.y = 0.99f;
         }
       }
     }
+
   }
 }

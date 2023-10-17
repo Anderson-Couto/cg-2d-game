@@ -19,6 +19,7 @@ void Window::onEvent(SDL_Event const &event) {
     if (event.key.keysym.sym == SDLK_RIGHT || event.key.keysym.sym == SDLK_d)
       m_gameData.m_input.reset(static_cast<size_t>(Input::Right));
   }
+
 }
 
 void Window::onCreate() {
@@ -62,6 +63,8 @@ void Window::restart() {
 }
 
 void Window::onUpdate() {
+  auto const deltaTime{gsl::narrow_cast<float>(getDeltaTime())};
+
   if (m_gameData.m_state != State::Playing &&
       m_restartWaitTimer.elapsed() > 5) {
     restart();
@@ -69,7 +72,7 @@ void Window::onUpdate() {
   }
 
   m_paddle.update(m_gameData);
-  m_ball.update(m_paddle, m_gameData);
+  m_ball.update(m_paddle, m_gameData, deltaTime);
 
   if (m_gameData.m_state == State::Playing) {
     // checkCollisions();
